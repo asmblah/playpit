@@ -6,7 +6,7 @@ A simple JS sandbox for Node environments.
 Installing
 ----------
 ```shell
-$ npm install --save playpit
+$ npm install --save playpit memory-fs
 ```
 
 ```javascript
