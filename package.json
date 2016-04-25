@@ -1,0 +1,43 @@
+{
+  "version": "0.1.0",
+  "name": "playpit",
+  "description": "A simple JS sandbox for Node environments",
+  "keywords": [
+    "js",
+    "sandbox"
+  ],
+  "homepage": "https://github.com/asmblah/playpit",
+  "author": "Dan Phillimore <dan@ovms.co> (http://ovms.co)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/asmblah/playpit"
+  },
+  "bugs": {
+    "email": "dan@ovms.co",
+    "url": "http://github.com/asmblah/playpit/issues"
+  },
+  "main": "index",
+  "scripts": {
+    "jshint": "jshint .",
+    "mocha": "mocha -r test/harness --recursive test/integration/ test/unit/",
+    "test": "npm run jshint && npm run mocha"
+  },
+  "dependencies": {
+    "memory-fs": "^0.3.0",
+    "microdash": "~1",
+    "resolve": "^1.1.7"
+  },
+  "devDependencies": {
+    "chai": "^2.3.0",
+    "chai-as-promised": "^5.1.0",
+    "jshint": "^2.8.0",
+    "mocha": "^2.3.3",
+    "nowdoc": "^1.0.0",
+    "sinon": "^1.17.3",
+    "sinon-chai": "^2.7.0"
+  },
+  "engines": {
+    "node": ">=0.6"
+  },
+  "license": "MIT"
+}
