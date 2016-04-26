@@ -103,6 +103,11 @@ _.extend(Sandbox.prototype, {
         // Expose the require cache as require.cache[...]
         require.cache = sandbox.requireCache;
 
+        if (filePath) {
+            // Cache the module's initial exports object to support circular dependencies
+            sandbox.requireCache[filePath] = exports;
+        }
+
         // Execute inside another VM context to allow the timeout to be applied
         sandbox.vm.runInNewContext(
             '(vm.runInContext(' +
@@ -124,7 +129,7 @@ _.extend(Sandbox.prototype, {
         );
 
         if (filePath) {
-            // Cache the module's exports to prevent them needing to be re-evaluated
+            // Cache the module's final exports object to prevent them needing to be re-evaluated
             sandbox.requireCache[filePath] = module.exports;
         }
 
