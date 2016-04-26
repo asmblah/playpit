@@ -92,6 +92,9 @@ _.extend(SandboxFactory.prototype, {
                 __dirname
             );
 
+        // Expose the `global` global
+        contextSandbox.global = contextSandbox;
+
         return new factory.Sandbox(
             sandboxFS,
             factory.path,

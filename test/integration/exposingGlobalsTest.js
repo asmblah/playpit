@@ -41,4 +41,11 @@ describe('Exposing globals integration', function () {
             )
         ).to.equal(21);
     });
+
+    it('should expose the `global` global, pointing to the sandbox\'s global object', function () {
+        var globalFromVar = this.sandbox.execute('module.exports = global;'),
+            globalFromThis = this.sandbox.execute('module.exports = this;');
+
+        expect(globalFromVar).to.equal(globalFromThis);
+    });
 });
