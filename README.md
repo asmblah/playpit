@@ -1,6 +1,8 @@
 Playpit
 =======
 
+[![Build Status](https://secure.travis-ci.org/asmblah/playpit.png?branch=master)](http://travis-ci.org/asmblah/playpit)
+
 A simple JS sandbox for Node environments.
 
 Installing
