@@ -48,14 +48,14 @@ _.extend(SandboxFactory.prototype, {
      *
      * @param {fs} sandboxFS
      * @param {Object.<string, object>} coreModules
+     * @param {Object.<string, *>} globals
      * @returns {Sandbox}
      */
-    create: function (sandboxFS, coreModules) {
+    create: function (sandboxFS, coreModules, globals) {
         var factory = this,
             realFS = factory.realFS,
-            contextSandbox = factory.vm.createContext({
-                console: console,
-                process: process
+            contextSandbox = factory.vm.createContext(globals || {
+                console: console
             }),
             // Create a bootstrap sandbox to load the `resolve` NPM library inside
             // but using the sandbox in-memory FS
@@ -63,7 +63,10 @@ _.extend(SandboxFactory.prototype, {
                 realFS,
                 factory.path,
                 factory.vm,
-                contextSandbox,
+                factory.vm.createContext({
+                    console: console,
+                    process: process
+                }),
                 function (path, basePath) {
                     var resolvedPath = factory.path.resolve(basePath, path);
 

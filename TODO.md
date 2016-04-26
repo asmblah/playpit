@@ -2,7 +2,6 @@ TODO
 ====
 
 - Implement require.resolve
-- Allow globals to be passed in, prevent `process` and `console` from being exposed if desired.
 - Allow native modules to be provided lazily by specifying a callback function for each
   rather than needing all of them to be loaded in first.
 - Load NPM inside the sandbox so that an entire package and/or its dependency tree can be loaded in-memory.
