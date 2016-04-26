@@ -15,11 +15,17 @@ var _ = require('microdash'),
 /**
  * @param {fs} fs
  * @param {path} path
+ * @param {vm} vm
+ * @param {pbject} contextSandbox
  * @param {function} resolve
  * @param {Object.<string, object>} coreModules
  * @constructor
  */
-function Sandbox(fs, path, resolve, coreModules) {
+function Sandbox(fs, path, vm, contextSandbox, resolve, coreModules) {
+    /**
+     * @type {pbject}
+     */
+    this.contextSandbox = contextSandbox;
     /**
      * @type {Object.<string, Object>}
      */
@@ -36,6 +42,10 @@ function Sandbox(fs, path, resolve, coreModules) {
      * @type {Function}
      */
     this.resolve = resolve;
+    /**
+     * @type {vm}
+     */
+    this.vm = vm;
 }
 
 _.extend(Sandbox.prototype, {
@@ -48,7 +58,6 @@ _.extend(Sandbox.prototype, {
      */
     execute: function (js, directoryPath) {
         var sandbox = this,
-            moduleWrapper = new Function('require, module, exports, __dirname', js),
             require = function (path) {
                 var contents,
                     resolvedPath;
@@ -69,7 +78,11 @@ _.extend(Sandbox.prototype, {
             exports = {},
             module = {
                 exports: exports
-            };
+            },
+            moduleWrapper = sandbox.vm.runInContext(
+                '(function (require, module, exports, __dirname) {\n' + js + '\n})',
+                sandbox.contextSandbox
+            );
 
         moduleWrapper(require, module, exports, directoryPath);
 

@@ -11,8 +11,9 @@
 
 var fs = require('fs'),
     path = require('path'),
+    vm = require('vm'),
     Sandbox = require('./src/Sandbox'),
     SandboxFactory = require('./src/SandboxFactory'),
-    sandboxFactory = new SandboxFactory(Sandbox, path, fs);
+    sandboxFactory = new SandboxFactory(Sandbox, path, fs, vm);
 
 module.exports = sandboxFactory;

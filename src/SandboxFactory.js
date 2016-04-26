@@ -15,10 +15,11 @@ var _ = require('microdash');
  * @param {class} Sandbox
  * @param {path} path
  * @param {fs} realFS
+ * @param {vm} vm
  * @param {Object.<string, object>} coreModules
  * @constructor
  */
-function SandboxFactory(Sandbox, path, realFS, coreModules) {
+function SandboxFactory(Sandbox, path, realFS, vm, coreModules) {
     /**
      * @type {Object.<string, Object>|{}}
      */
@@ -35,6 +36,10 @@ function SandboxFactory(Sandbox, path, realFS, coreModules) {
      * @type {class}
      */
     this.Sandbox = Sandbox;
+    /**
+     * @type {vm}
+     */
+    this.vm = vm;
 }
 
 _.extend(SandboxFactory.prototype, {
@@ -48,26 +53,37 @@ _.extend(SandboxFactory.prototype, {
     create: function (sandboxFS, coreModules) {
         var factory = this,
             realFS = factory.realFS,
+            contextSandbox = factory.vm.createContext({
+                console: console,
+                process: process
+            }),
             // Create a bootstrap sandbox to load the `resolve` NPM library inside
             // but using the sandbox in-memory FS
-            bootstrapSandbox = new factory.Sandbox(realFS, factory.path, function (path, basePath) {
-                var resolvedPath = factory.path.resolve(basePath, path);
+            bootstrapSandbox = new factory.Sandbox(
+                realFS,
+                factory.path,
+                factory.vm,
+                contextSandbox,
+                function (path, basePath) {
+                    var resolvedPath = factory.path.resolve(basePath, path);
 
-                if (realFS.existsSync(resolvedPath + '.js')) {
-                    resolvedPath += '.js';
-                } else if (realFS.existsSync(resolvedPath + '/index.js')) {
-                    resolvedPath += '/index.js';
+                    if (realFS.existsSync(resolvedPath + '.js')) {
+                        resolvedPath += '.js';
+                    } else if (realFS.existsSync(resolvedPath + '/index.js')) {
+                        resolvedPath += '/index.js';
+                    }
+
+                    if (!realFS.existsSync(resolvedPath)) {
+                        throw new Error('Could not resolve path "' + resolvedPath + '"');
+                    }
+
+                    return resolvedPath;
+                },
+                {
+                    'fs': sandboxFS,
+                    'path': factory.path
                 }
-
-                if (!realFS.existsSync(resolvedPath)) {
-                    throw new Error('Could not resolve path "' + resolvedPath + '"');
-                }
-
-                return resolvedPath;
-            }, {
-                'fs': sandboxFS,
-                'path': factory.path
-            }),
+            ),
             sandboxedResolve = bootstrapSandbox.execute(
                 'module.exports = require(' + JSON.stringify(require.resolve('resolve')) + ');',
                 __dirname
@@ -76,6 +92,8 @@ _.extend(SandboxFactory.prototype, {
         return new factory.Sandbox(
             sandboxFS,
             factory.path,
+            factory.vm,
+            contextSandbox,
             function (path, basePath) {
                 return sandboxedResolve.sync(path, {basedir: basePath});
             },
