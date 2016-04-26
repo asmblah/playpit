@@ -54,10 +54,12 @@ _.extend(Sandbox.prototype, {
      *
      * @param {string} js
      * @param {string} filePath
+     * @param {object} options
      * @returns {{}} Returns module.exports from the module
      */
-    execute: function (js, filePath) {
+    execute: function (js, filePath, options) {
         var sandbox = this,
+            allOptions = _.extend({timeout: 2000}, options),
             directoryPath = sandbox.path.dirname(filePath),
             require = function (path) {
                 var contents,
@@ -80,12 +82,27 @@ _.extend(Sandbox.prototype, {
             module = {
                 exports: exports
             },
-            moduleWrapper = sandbox.vm.runInContext(
-                '(function (require, module, exports, __dirname) {\n' + js + '\n})',
-                sandbox.contextSandbox
-            );
+            moduleCode = JSON.stringify('(function (require, module, exports, __dirname) {\n' + js + '\n})');
 
-        moduleWrapper(require, module, exports, directoryPath);
+        // Execute inside another VM context to allow the timeout to be applied
+        sandbox.vm.runInNewContext(
+            '(vm.runInContext(' +
+                moduleCode +
+            ', contextSandbox, ' + JSON.stringify({filename: filePath}) + '))' +
+            '(require, module, exports, directoryPath)',
+            {
+                contextSandbox: sandbox.contextSandbox,
+                vm: sandbox.vm,
+                require: require,
+                module: module,
+                exports: exports,
+                directoryPath: directoryPath
+            },
+            {
+                displayErrors: false,
+                timeout: allOptions.timeout
+            }
+        );
 
         return module.exports;
     }
