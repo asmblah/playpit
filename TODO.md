@@ -1,7 +1,6 @@
 TODO
 ====
 
-- Cache module exports values so they aren't re-evaluated. require.modules?
 - Implement require.resolve
 - Allow globals to be passed in, prevent `process` and `console` from being exposed if desired.
 - Allow native modules to be provided lazily by specifying a callback function for each

@@ -39,6 +39,10 @@ function Sandbox(fs, path, vm, contextSandbox, resolve, coreModules) {
      */
     this.path = path;
     /**
+     * @type {{}}
+     */
+    this.requireCache = {};
+    /**
      * @type {Function}
      */
     this.resolve = resolve;
@@ -60,7 +64,8 @@ _.extend(Sandbox.prototype, {
     execute: function (js, filePath, options) {
         var sandbox = this,
             allOptions = _.extend({timeout: 2000}, options),
-            directoryPath = sandbox.path.dirname(filePath),
+            resolvedFilePath = filePath || null,
+            directoryPath = resolvedFilePath ? sandbox.path.dirname(resolvedFilePath) : null,
             require = function (path) {
                 var contents,
                     resolvedPath;
@@ -69,9 +74,20 @@ _.extend(Sandbox.prototype, {
                     return sandbox.coreModules[path];
                 }
 
-                resolvedPath = sandbox.resolve(path, directoryPath);
+                resolvedPath = sandbox.resolve(path, directoryPath || '');
+
+                // Fetch the module's exports from the cache if present
+                if (hasOwn.call(sandbox.requireCache, resolvedPath)) {
+                    return sandbox.requireCache[resolvedPath];
+                }
+
+                if (!sandbox.fs.existsSync(resolvedPath)) {
+                    throw new Error('Cannot find module with path "' + resolvedPath + '"');
+                }
+
                 contents = sandbox.fs.readFileSync(resolvedPath);
 
+                // Load JSON files (with the `.json` extension) in and parse as JSON
                 if (/\.json$/.test(path)) {
                     return JSON.parse(contents);
                 }
@@ -84,11 +100,14 @@ _.extend(Sandbox.prototype, {
             },
             moduleCode = JSON.stringify('(function (require, module, exports, __dirname) {\n' + js + '\n})');
 
+        // Expose the require cache as require.cache[...]
+        require.cache = sandbox.requireCache;
+
         // Execute inside another VM context to allow the timeout to be applied
         sandbox.vm.runInNewContext(
             '(vm.runInContext(' +
                 moduleCode +
-            ', contextSandbox, ' + JSON.stringify({filename: filePath}) + '))' +
+            ', contextSandbox, ' + JSON.stringify({filename: resolvedFilePath || '<sandboxed script>'}) + '))' +
             '(require, module, exports, directoryPath)',
             {
                 contextSandbox: sandbox.contextSandbox,
@@ -103,6 +122,11 @@ _.extend(Sandbox.prototype, {
                 timeout: allOptions.timeout
             }
         );
+
+        if (filePath) {
+            // Cache the module's exports to prevent them needing to be re-evaluated
+            sandbox.requireCache[filePath] = module.exports;
+        }
 
         return module.exports;
     }
