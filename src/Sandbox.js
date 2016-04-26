@@ -53,11 +53,12 @@ _.extend(Sandbox.prototype, {
      * Executes JavaScript code inside the sandbox
      *
      * @param {string} js
-     * @param {string} directoryPath
+     * @param {string} filePath
      * @returns {{}} Returns module.exports from the module
      */
-    execute: function (js, directoryPath) {
+    execute: function (js, filePath) {
         var sandbox = this,
+            directoryPath = sandbox.path.dirname(filePath),
             require = function (path) {
                 var contents,
                     resolvedPath;
@@ -73,7 +74,7 @@ _.extend(Sandbox.prototype, {
                     return JSON.parse(contents);
                 }
 
-                return sandbox.execute(contents, sandbox.path.dirname(resolvedPath));
+                return sandbox.execute(contents, resolvedPath);
             },
             exports = {},
             module = {
