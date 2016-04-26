@@ -37,7 +37,7 @@
     "sinon-chai": "^2.7.0"
   },
   "engines": {
-    "node": ">=0.6"
+    "node": ">=0.12"
   },
   "license": "MIT"
 }
