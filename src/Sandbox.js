@@ -85,7 +85,7 @@ _.extend(Sandbox.prototype, {
                     throw new Error('Cannot find module with path "' + resolvedPath + '"');
                 }
 
-                contents = sandbox.fs.readFileSync(resolvedPath);
+                contents = sandbox.fs.readFileSync(resolvedPath).toString();
 
                 // Load JSON files (with the `.json` extension) in and parse as JSON
                 if (/\.json$/.test(path)) {
@@ -98,7 +98,13 @@ _.extend(Sandbox.prototype, {
             module = {
                 exports: exports
             },
-            moduleCode = JSON.stringify('(function (require, module, exports, __dirname) {\n' + js + '\n})');
+            moduleCode;
+
+        // Remove any hashbang
+        js = js.replace(/^#!.*/, '');
+
+        // Wrap the module in the CommonJS wrapper function
+        moduleCode = JSON.stringify('(function (require, module, exports, __dirname) {\n' + js + '\n})');
 
         // Expose the require cache as require.cache[...]
         require.cache = sandbox.requireCache;
