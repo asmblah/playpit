@@ -67,32 +67,7 @@ _.extend(Sandbox.prototype, {
             resolvedFilePath = filePath || null,
             directoryPath = resolvedFilePath ? sandbox.path.dirname(resolvedFilePath) : null,
             require = function (path) {
-                var contents,
-                    resolvedPath;
-
-                if (hasOwn.call(sandbox.coreModules, path)) {
-                    return sandbox.coreModules[path];
-                }
-
-                resolvedPath = sandbox.resolve(path, directoryPath || '');
-
-                // Fetch the module's exports from the cache if present
-                if (hasOwn.call(sandbox.requireCache, resolvedPath)) {
-                    return sandbox.requireCache[resolvedPath];
-                }
-
-                if (!sandbox.fs.existsSync(resolvedPath)) {
-                    throw new Error('Cannot find module with path "' + resolvedPath + '"');
-                }
-
-                contents = sandbox.fs.readFileSync(resolvedPath).toString();
-
-                // Load JSON files (with the `.json` extension) in and parse as JSON
-                if (/\.json$/.test(path)) {
-                    return JSON.parse(contents);
-                }
-
-                return sandbox.execute(contents, resolvedPath);
+                return sandbox.require(path, directoryPath);
             },
             exports = {},
             module = {
@@ -140,6 +115,44 @@ _.extend(Sandbox.prototype, {
         }
 
         return module.exports;
+    },
+
+    /**
+     * Requires a module from inside the sandbox
+     *
+     * @param {string} path
+     * @param {string|null} basePath
+     * @returns {*}
+     */
+    require: function (path, basePath) {
+        var contents,
+            resolvedPath,
+            sandbox = this;
+
+        // Core modules take precedence if there is a match
+        if (hasOwn.call(sandbox.coreModules, path)) {
+            return sandbox.coreModules[path];
+        }
+
+        resolvedPath = sandbox.resolve(path, basePath || '');
+
+        // Fetch the module's exports from the cache if present
+        if (hasOwn.call(sandbox.requireCache, resolvedPath)) {
+            return sandbox.requireCache[resolvedPath];
+        }
+
+        if (!sandbox.fs.existsSync(resolvedPath)) {
+            throw new Error('Cannot find module with path "' + resolvedPath + '"');
+        }
+
+        contents = sandbox.fs.readFileSync(resolvedPath).toString();
+
+        // Load JSON files (with the `.json` extension) in and parse as JSON
+        if (/\.json$/.test(path)) {
+            return JSON.parse(contents);
+        }
+
+        return sandbox.execute(contents, resolvedPath);
     }
 });
 
