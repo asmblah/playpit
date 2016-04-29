@@ -79,7 +79,7 @@ _.extend(Sandbox.prototype, {
         js = js.replace(/^#!.*/, '');
 
         // Wrap the module in the CommonJS wrapper function
-        moduleCode = JSON.stringify('(function (require, module, exports, __dirname) {\n' + js + '\n})');
+        moduleCode = JSON.stringify('(function (require, module, exports, __dirname, __filename) {\n' + js + '\n})');
 
         // Expose the require cache as require.cache[...]
         require.cache = sandbox.requireCache;
@@ -94,17 +94,19 @@ _.extend(Sandbox.prototype, {
             '(vm.runInContext(' +
                 moduleCode +
             ', contextSandbox, ' + JSON.stringify({filename: resolvedFilePath || '<sandboxed script>'}) + '))' +
-            '(require, module, exports, directoryPath)',
+            '(require, module, exports, directoryPath, filePath)',
             {
                 contextSandbox: sandbox.contextSandbox,
                 vm: sandbox.vm,
                 require: require,
                 module: module,
                 exports: exports,
-                directoryPath: directoryPath
+                directoryPath: directoryPath,
+                filePath: filePath
             },
             {
                 displayErrors: false,
+                filename: '<playpit internal>',
                 timeout: allOptions.timeout
             }
         );
