@@ -146,7 +146,7 @@ _.extend(Sandbox.prototype, {
         contents = sandbox.fs.readFileSync(resolvedPath).toString();
 
         // Load JSON files (with the `.json` extension) in and parse as JSON
-        if (/\.json$/.test(path)) {
+        if (/\.json$/.test(resolvedPath)) {
             return JSON.parse(contents);
         }
 

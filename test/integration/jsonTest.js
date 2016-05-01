@@ -29,4 +29,17 @@ describe('JSON file integration', function () {
             )
         ).to.deep.equal({abc: 123});
     });
+
+    it('should support require()-ing a JSON file with auto-appended extension', function () {
+        this.memoryFS.mkdirSync('/my/');
+        this.memoryFS.mkdirSync('/my/dir/');
+        this.memoryFS.writeFileSync('/my/dir/data.json', JSON.stringify({abc: 123}));
+
+        expect(
+            this.sandbox.execute(
+                'module.exports = require("/my/dir/data");',
+                '/my/directory/myfile.js'
+            )
+        ).to.deep.equal({abc: 123});
+    });
 });

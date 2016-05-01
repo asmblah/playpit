@@ -101,7 +101,12 @@ _.extend(SandboxFactory.prototype, {
             factory.vm,
             contextSandbox,
             function (path, basePath) {
-                return sandboxedResolve.sync(path, {basedir: basePath});
+                return sandboxedResolve.sync(path, {
+                    basedir: basePath,
+                    // Allow both .js and .json files to be resolved to
+                    // without explicitly specifying the extension
+                    extensions: ['.js', '.json']
+                });
             },
             _.extend({}, factory.coreModules, coreModules)
         );
