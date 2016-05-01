@@ -9,11 +9,11 @@
 
 'use strict';
 
-var MemoryFileSystem = require('memory-fs');
+var mockFS = require('mock-fs');
 
 describe('Require caching integration', function () {
     beforeEach(function () {
-        this.memoryFS = new MemoryFileSystem();
+        this.memoryFS = mockFS.fs();
         this.sandbox = require('../..').create(this.memoryFS);
     });
 

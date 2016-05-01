@@ -9,16 +9,17 @@
 
 'use strict';
 
-var MemoryFileSystem = require('memory-fs');
+var mockFS = require('mock-fs');
 
 describe('JSON file integration', function () {
     beforeEach(function () {
-        this.memoryFS = new MemoryFileSystem();
+        this.memoryFS = mockFS.fs();
         this.sandbox = require('../..').create(this.memoryFS);
     });
 
     it('should support require()-ing a JSON file', function () {
-        this.memoryFS.mkdirpSync('/my/dir/');
+        this.memoryFS.mkdirSync('/my/');
+        this.memoryFS.mkdirSync('/my/dir/');
         this.memoryFS.writeFileSync('/my/dir/data.json', JSON.stringify({abc: 123}));
 
         expect(

@@ -9,11 +9,11 @@
 
 'use strict';
 
-var MemoryFileSystem = require('memory-fs');
+var mockFS = require('mock-fs');
 
 describe('Exposing globals integration', function () {
     beforeEach(function () {
-        this.memoryFS = new MemoryFileSystem();
+        this.memoryFS = mockFS.fs();
     });
 
     it('should support exposing a custom `console` global', function () {

@@ -9,11 +9,11 @@
 
 'use strict';
 
-var MemoryFileSystem = require('memory-fs');
+var mockFS = require('mock-fs');
 
 describe('Call stack limit handling integration', function () {
     beforeEach(function () {
-        this.memoryFS = new MemoryFileSystem();
+        this.memoryFS = mockFS.fs();
         this.sandbox = require('../..').create(this.memoryFS);
         this.RangeError = this.sandbox.execute('module.exports = RangeError;');
     });

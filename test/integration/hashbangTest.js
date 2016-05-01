@@ -9,11 +9,11 @@
 
 'use strict';
 
-var MemoryFileSystem = require('memory-fs');
+var mockFS = require('mock-fs');
 
 describe('Hashbang handling integration', function () {
     beforeEach(function () {
-        this.memoryFS = new MemoryFileSystem();
+        this.memoryFS = mockFS.fs();
         this.sandbox = require('../..').create(this.memoryFS);
     });
 
@@ -24,7 +24,8 @@ describe('Hashbang handling integration', function () {
     });
 
     it('should execute a required module with a leading hashbang line', function () {
-        this.memoryFS.mkdirpSync('/another/dir/');
+        this.memoryFS.mkdirSync('/another/');
+        this.memoryFS.mkdirSync('/another/dir/');
         this.memoryFS.writeFileSync('/another/dir/script.js', '#!/bin/sh\nmodule.exports = 21;');
 
         expect(

@@ -9,11 +9,11 @@
 
 'use strict';
 
-var MemoryFileSystem = require('memory-fs');
+var mockFS = require('mock-fs');
 
 describe('Dirname integration', function () {
     beforeEach(function () {
-        this.memoryFS = new MemoryFileSystem();
+        this.memoryFS = mockFS.fs();
         this.sandbox = require('../..').create(this.memoryFS);
     });
 
@@ -27,7 +27,8 @@ describe('Dirname integration', function () {
     });
 
     it('should expose the correct directory path inside a sub-required module', function () {
-        this.memoryFS.mkdirpSync('/another/dir/');
+        this.memoryFS.mkdirSync('/another/');
+        this.memoryFS.mkdirSync('/another/dir/');
         this.memoryFS.writeFileSync('/another/dir/script.js', 'module.exports = "dir: [" + __dirname + "]";');
 
         expect(

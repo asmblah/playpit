@@ -9,15 +9,15 @@
 
 'use strict';
 
-var MemoryFileSystem = require('memory-fs');
+var mockFS = require('mock-fs');
 
 describe('Circular dependency integration', function () {
     beforeEach(function () {
-        this.memoryFS = new MemoryFileSystem();
+        this.memoryFS = mockFS.fs();
         this.sandbox = require('../..').create(this.memoryFS);
     });
 
-    it('should support two files require()-ing each other', function () {
+    it('should support two files require()-ing each other with default exports objects', function () {
         var result;
         this.memoryFS.writeFileSync('/file1.js', 'exports.other = require("/file2.js"); exports.me = 1;');
         this.memoryFS.writeFileSync('/file2.js', 'exports.other = require("/file1.js"); exports.me = 2;');
