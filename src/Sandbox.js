@@ -10,7 +10,8 @@
 'use strict';
 
 var _ = require('microdash'),
-    hasOwn = {}.hasOwnProperty;
+    hasOwn = {}.hasOwnProperty,
+    path = require('path');
 
 /**
  * @param {fs} fs
@@ -64,7 +65,7 @@ _.extend(Sandbox.prototype, {
     execute: function (js, filePath, options) {
         var sandbox = this,
             allOptions = _.extend({timeout: 2000}, options),
-            resolvedFilePath = filePath || null,
+            resolvedFilePath = filePath ? path.resolve(filePath) : null,
             directoryPath = resolvedFilePath ? sandbox.path.dirname(resolvedFilePath) : null,
             require = function (path) {
                 return sandbox.require(path, directoryPath);
@@ -84,9 +85,9 @@ _.extend(Sandbox.prototype, {
         // Expose the require cache as require.cache[...]
         require.cache = sandbox.requireCache;
 
-        if (filePath) {
+        if (resolvedFilePath) {
             // Cache the module's initial exports object to support circular dependencies
-            sandbox.requireCache[filePath] = exports;
+            sandbox.requireCache[resolvedFilePath] = exports;
         }
 
         // Execute inside another VM context to allow the timeout to be applied
@@ -102,7 +103,7 @@ _.extend(Sandbox.prototype, {
                 module: module,
                 exports: exports,
                 directoryPath: directoryPath,
-                filePath: filePath
+                filePath: resolvedFilePath
             },
             {
                 displayErrors: false,
@@ -111,9 +112,9 @@ _.extend(Sandbox.prototype, {
             }
         );
 
-        if (filePath) {
+        if (resolvedFilePath) {
             // Cache the module's final exports object to prevent them needing to be re-evaluated
-            sandbox.requireCache[filePath] = module.exports;
+            sandbox.requireCache[resolvedFilePath] = module.exports;
         }
 
         return module.exports;

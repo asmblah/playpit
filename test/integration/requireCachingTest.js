@@ -24,6 +24,13 @@ describe('Require caching integration', function () {
             .to.equal(this.sandbox.execute('module.exports = require("/myinclude.js");'));
     });
 
+    it('should return the same exports object the second time a module is required with an equivalent path', function () {
+        this.memoryFS.writeFileSync('/myinclude.js', 'module.exports = {abc: 123};');
+
+        expect(this.sandbox.execute('module.exports = require("/myinclude.js");'))
+            .to.equal(this.sandbox.execute('module.exports = require("/././myinclude.js");'));
+    });
+
     it('should make the exports value available via require.cache[...]', function () {
         this.memoryFS.writeFileSync('/myinclude.js', 'module.exports = 21;');
 
