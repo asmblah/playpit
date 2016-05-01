@@ -86,8 +86,8 @@ _.extend(Sandbox.prototype, {
         require.cache = sandbox.requireCache;
 
         if (resolvedFilePath) {
-            // Cache the module's initial exports object to support circular dependencies
-            sandbox.requireCache[resolvedFilePath] = exports;
+            // Cache the module object to support circular dependencies
+            sandbox.requireCache[resolvedFilePath] = module;
         }
 
         // Execute inside another VM context to allow the timeout to be applied
@@ -111,11 +111,6 @@ _.extend(Sandbox.prototype, {
                 timeout: allOptions.timeout
             }
         );
-
-        if (resolvedFilePath) {
-            // Cache the module's final exports object to prevent them needing to be re-evaluated
-            sandbox.requireCache[resolvedFilePath] = module.exports;
-        }
 
         return module.exports;
     },
@@ -141,7 +136,7 @@ _.extend(Sandbox.prototype, {
 
         // Fetch the module's exports from the cache if present
         if (hasOwn.call(sandbox.requireCache, resolvedPath)) {
-            return sandbox.requireCache[resolvedPath];
+            return sandbox.requireCache[resolvedPath].exports;
         }
 
         if (!sandbox.fs.existsSync(resolvedPath)) {

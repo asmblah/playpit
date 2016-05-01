@@ -38,7 +38,7 @@ describe('Require caching integration', function () {
 
         expect(
             this.sandbox.execute(
-                'module.exports = require.cache["/myinclude.js"];'
+                'module.exports = require.cache["/myinclude.js"].exports;'
             )
         ).to.equal(21);
     });
@@ -48,7 +48,7 @@ describe('Require caching integration', function () {
 
         expect(
             this.sandbox.execute(
-                'module.exports = require.cache["/my/entry/file.js"];'
+                'module.exports = require.cache["/my/entry/file.js"].exports;'
             )
         ).to.equal(27);
     });
