@@ -1,20 +1,20 @@
 'use strict';
 
 var sandboxFactory = require('..'),
-    MemoryFS = require('memory-fs'),
-    memoryFS = new MemoryFS(),
-    sandbox = sandboxFactory.create(memoryFS);
+    mockFS = require('mock-fs').fs(),
+    sandbox = sandboxFactory.create(mockFS);
 
-memoryFS.mkdirpSync('/my/dir');
-memoryFS.writeFileSync(
+mockFS.mkdirSync('/my');
+mockFS.mkdirSync('/my/dir');
+mockFS.writeFileSync(
     '/my/dir/file1.js',
     'console.log("File1"); require("./file2.js"); console.log("Then"); require("/my/dir"); console.log("End");'
 );
-memoryFS.writeFileSync(
+mockFS.writeFileSync(
     '/my/dir/index.js',
     'console.log("Index");'
 );
-memoryFS.writeFileSync(
+mockFS.writeFileSync(
     '/my/dir/file2.js',
     'console.log("File2");'
 );
